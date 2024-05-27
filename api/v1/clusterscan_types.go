@@ -1,41 +1,31 @@
-/*
-Copyright 2024.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package v1
 
 import (
+	batchv1 "k8s.io/api/batch/v1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // ClusterScanSpec defines the desired state of ClusterScan
 type ClusterScanSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// JobTemplate is a template for creating Jobs
+	JobTemplate corev1.PodTemplateSpec `json:"jobTemplate,omitempty"`
 
-	// Foo is an example field of ClusterScan. Edit clusterscan_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// CronJobTemplate is a template for creating CronJobs
+	CronJobTemplate batchv1beta1.CronJobSpec `json:"cronJobTemplate,omitempty"`
+
+	// Schedule is a cron-like schedule for running the job
+	Schedule string `json:"schedule,omitempty"` // is this needed?
 }
 
 // ClusterScanStatus defines the observed state of ClusterScan
 type ClusterScanStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// JobStatus is the current status of the created Job
+	JobStatus batchv1.JobStatus `json:"jobStatus,omitempty"`
+
+	// CronJobStatus is the current status of the created CronJob
+	CronJobStatus batchv1beta1.CronJobStatus `json:"cronJobStatus,omitempty"`
 }
 
 //+kubebuilder:object:root=true
