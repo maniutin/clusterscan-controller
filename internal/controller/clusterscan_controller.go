@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 
+	k8sBatchv1 "k8s.io/api/batch/v1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -101,7 +103,41 @@ func newJobForCR(cr *batchv1.ClusterScan) *batchv1.ClusterScan {
 					},
 				},
 			},
-
+			CronJobTemplate: batchv1beta1.CronJobSpec{
+				Schedule: "*/1 * * * *",
+				JobTemplate: batchv1beta1.JobTemplateSpec{
+					Spec: k8sBatchv1.JobSpec{
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Name:  "kube-linter",
+										Image: "stackrox/kube-linter:0.2.2",
+										Args:  []string{"lint", "../../files-to-lint"},
+										VolumeMounts: []corev1.VolumeMount{
+											{
+												Name:      "dir-to-lint",
+												MountPath: "../../files-to-lint",
+											},
+										},
+									},
+								},
+								RestartPolicy: corev1.RestartPolicyOnFailure,
+								Volumes: []corev1.Volume{
+									{
+										Name: "dir-to-lint",
+										VolumeSource: corev1.VolumeSource{
+											HostPath: &corev1.HostPathVolumeSource{
+												Path: "../../files-to-lint",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
