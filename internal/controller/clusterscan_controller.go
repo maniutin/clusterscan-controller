@@ -36,7 +36,7 @@ func (r *ClusterScanReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	// Define a new Job object
-	job := newJobForCR(clusterScan)
+	job := newJobForCustomResource(clusterScan)
 
 	// Check if this Job already exists
 	found := &batchv1.ClusterScan{}
@@ -63,8 +63,8 @@ func (r *ClusterScanReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	return ctrl.Result{}, nil
 }
 
-// newJobForCR returns a job with the same name/namespace as the cr
-func newJobForCR(cr *batchv1.ClusterScan) *batchv1.ClusterScan {
+// newJobForCustomResource returns a job with the same name/namespace as the cr
+func newJobForCustomResource(cr *batchv1.ClusterScan) *batchv1.ClusterScan {
 	labels := map[string]string{
 		"app": cr.Name,
 	}
