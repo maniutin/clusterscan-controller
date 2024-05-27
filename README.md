@@ -1,18 +1,38 @@
 # clusterscan-controller
-// TODO(user): Add simple overview of use/purpose
+
+Basic kubernetes controller that reconciles a ClusterScan custom resource.
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+
+ClusterScan controller reconciles ClusterScans custom resource and create Jobs and/or CronJobs. It supports both one-off and recurring executions.
+
+## Implementation Walkthrough
+
+1. Defined the ClusterScan Spec and Status.
+2. Implemented the Reconcile method.
+   The method first fetches the ClusterScan from the API server. If it can't find the ClusterScan, it logs an error and returns. It then defines a new Job object using the newJobForCustomResource function. It checks if a Job with the same name and namespace already exists. If it does, it logs an error and returns. If it doesn't, it creates the Job and logs an error if the creation fails.
+3. Added manager logic to the BeforeSuite() function inside `suite_test.go` to be able to register the ClusterScan controller to run on the test cluster.
+4. Implemented a unit test for the ClusterScan controller.
+5. Updated the `Makefile` to deal with the `metadata.annotations: Too long: must have at most 262144 bytes` error.
+
+## Future improvements
+
+1. Adjust CronJob schedule.
+2. Move mock structs from the test into a separate utils file.
+3. Dynamic paths to files run the controller against.
+4. Dockerize and deploy.
 
 ## Getting Started
 
 ### Prerequisites
+
 - go version v1.21.0+
 - docker version 17.03+.
 - kubectl version v1.11.3+.
 - Access to a Kubernetes v1.11.3+ cluster.
 
 ### To Deploy on the cluster
+
 **Build and push your image to the location specified by `IMG`:**
 
 ```sh
@@ -36,7 +56,7 @@ make deploy IMG=<some-registry>/clusterscan-controller:tag
 ```
 
 > **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
-privileges or be logged in as admin.
+> privileges or be logged in as admin.
 
 **Create instances of your solution**
 You can apply the samples (examples) from the config/sample:
@@ -45,9 +65,10 @@ You can apply the samples (examples) from the config/sample:
 kubectl apply -k config/samples/
 ```
 
->**NOTE**: Ensure that the samples has default values to test it out.
+> **NOTE**: Ensure that the samples has default values to test it out.
 
 ### To Uninstall
+
 **Delete the instances (CRs) from the cluster:**
 
 ```sh
@@ -90,6 +111,7 @@ kubectl apply -f https://raw.githubusercontent.com/<org>/clusterscan-controller/
 ```
 
 ## Contributing
+
 // TODO(user): Add detailed information on how you would like others to contribute to this project
 
 **NOTE:** Run `make help` for more information on all potential `make` targets
@@ -111,4 +133,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
