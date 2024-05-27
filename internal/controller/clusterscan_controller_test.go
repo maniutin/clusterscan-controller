@@ -25,35 +25,105 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	k8sBatchv1 "k8s.io/api/batch/v1"
 	batchv1 "my.domain/api/v1"
 )
 
 var _ = Describe("ClusterScan Controller", func() {
 	Context("When reconciling a resource", func() {
-		const resourceName = "test-resource"
+		resourceName := "test-scan-3"
 
 		ctx := context.Background()
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Namespace: "default",
 		}
 		clusterscan := &batchv1.ClusterScan{}
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind ClusterScan")
+
 			err := k8sClient.Get(ctx, typeNamespacedName, clusterscan)
-			if err != nil && errors.IsNotFound(err) {
+			if err != nil || errors.IsNotFound(err) {
+				// fmt.Printf("IsNotFound: %v", err)
 				resource := &batchv1.ClusterScan{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
 					},
-					// TODO(user): Specify other spec details if needed.
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "batch.my.domain/v1",
+						Kind:       "ClusterScan",
+					},
+					Spec: batchv1.ClusterScanSpec{
+						JobTemplate: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Name:  "test-container",
+										Image: "busybox",
+										Command: []string{
+											"echo",
+											"hello",
+										},
+									},
+								},
+							},
+						},
+						CronJobTemplate: batchv1beta1.CronJobSpec{
+							Schedule: "*/1 * * * *",
+							JobTemplate: batchv1beta1.JobTemplateSpec{
+								Spec: k8sBatchv1.JobSpec{
+									Template: corev1.PodTemplateSpec{
+										Spec: corev1.PodSpec{
+											Containers: []corev1.Container{
+												{
+													Name:  "kube-linter",
+													Image: "stackrox/kube-linter:0.2.2",
+													Args:  []string{"lint", "../../files-to-lint"},
+													VolumeMounts: []corev1.VolumeMount{
+														{
+															Name:      "dir-to-lint",
+															MountPath: "../../files-to-lint",
+														},
+													},
+												},
+											},
+											RestartPolicy: corev1.RestartPolicyOnFailure,
+											Volumes: []corev1.Volume{
+												{
+													Name: "dir-to-lint",
+													VolumeSource: corev1.VolumeSource{
+														HostPath: &corev1.HostPathVolumeSource{
+															Path: "../../files-to-lint",
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						Schedule: "*/1 * * * *",
+					},
+					Status: batchv1.ClusterScanStatus{
+						JobStatus: k8sBatchv1.JobStatus{
+							Active: 1,
+						},
+					},
 				}
-				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+
+				By("Creating the ClusterScan resource")
+
+				err := k8sClient.Create(ctx, resource)
+				Expect(err).NotTo(HaveOccurred())
+
 			}
 		})
 
@@ -66,6 +136,7 @@ var _ = Describe("ClusterScan Controller", func() {
 			By("Cleanup the specific resource instance ClusterScan")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 		})
+
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
 			controllerReconciler := &ClusterScanReconciler{
