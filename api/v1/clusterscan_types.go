@@ -14,9 +14,6 @@ type ClusterScanSpec struct {
 
 	// CronJobTemplate is a template for creating CronJobs
 	CronJobTemplate batchv1beta1.CronJobSpec `json:"cronJobTemplate,omitempty"`
-
-	// Schedule is a cron-like schedule for running the job
-	Schedule string `json:"schedule,omitempty"` // is this needed?
 }
 
 // ClusterScanStatus defines the observed state of ClusterScan

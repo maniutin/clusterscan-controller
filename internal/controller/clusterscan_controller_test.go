@@ -35,7 +35,7 @@ import (
 
 var _ = Describe("ClusterScan Controller", func() {
 	Context("When reconciling a resource", func() {
-		resourceName := "test-scan-3"
+		resourceName := "test-scan"
 
 		ctx := context.Background()
 
@@ -46,11 +46,10 @@ var _ = Describe("ClusterScan Controller", func() {
 		clusterscan := &batchv1.ClusterScan{}
 
 		BeforeEach(func() {
-			By("creating the custom resource for the Kind ClusterScan")
+			By("creating custom resource for the Kind ClusterScan")
 
 			err := k8sClient.Get(ctx, typeNamespacedName, clusterscan)
 			if err != nil || errors.IsNotFound(err) {
-				// fmt.Printf("IsNotFound: %v", err)
 				resource := &batchv1.ClusterScan{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
@@ -85,11 +84,11 @@ var _ = Describe("ClusterScan Controller", func() {
 												{
 													Name:  "kube-linter",
 													Image: "stackrox/kube-linter:0.2.2",
-													Args:  []string{"lint", "../../files-to-lint"},
+													Args:  []string{"lint", "../../example-files"},
 													VolumeMounts: []corev1.VolumeMount{
 														{
 															Name:      "dir-to-lint",
-															MountPath: "../../files-to-lint",
+															MountPath: "../../example-files",
 														},
 													},
 												},
@@ -100,7 +99,7 @@ var _ = Describe("ClusterScan Controller", func() {
 													Name: "dir-to-lint",
 													VolumeSource: corev1.VolumeSource{
 														HostPath: &corev1.HostPathVolumeSource{
-															Path: "../../files-to-lint",
+															Path: "../../example-files",
 														},
 													},
 												},
@@ -110,7 +109,6 @@ var _ = Describe("ClusterScan Controller", func() {
 								},
 							},
 						},
-						Schedule: "*/1 * * * *",
 					},
 					Status: batchv1.ClusterScanStatus{
 						JobStatus: k8sBatchv1.JobStatus{
@@ -128,7 +126,6 @@ var _ = Describe("ClusterScan Controller", func() {
 		})
 
 		AfterEach(func() {
-			// TODO(user): Cleanup logic after each test, like removing the resource instance.
 			resource := &batchv1.ClusterScan{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
@@ -148,8 +145,6 @@ var _ = Describe("ClusterScan Controller", func() {
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
-			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
-			// Example: If you expect a certain status condition after reconciliation, verify it here.
 		})
 	})
 })

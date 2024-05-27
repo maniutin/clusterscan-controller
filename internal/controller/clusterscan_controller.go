@@ -81,11 +81,11 @@ func newJobForCR(cr *batchv1.ClusterScan) *batchv1.ClusterScan {
 						{
 							Name:  "kube-linter",
 							Image: "stackrox/kube-linter:0.2.2",
-							Args:  []string{"lint", "../../files-to-lint"},
+							Args:  []string{"lint", "../../example-files"},
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "dir-to-lint",
-									MountPath: "../../files-to-lint",
+									MountPath: "../../example-files",
 								},
 							},
 						},
@@ -96,7 +96,7 @@ func newJobForCR(cr *batchv1.ClusterScan) *batchv1.ClusterScan {
 							Name: "dir-to-lint",
 							VolumeSource: corev1.VolumeSource{
 								HostPath: &corev1.HostPathVolumeSource{
-									Path: "../../files-to-lint",
+									Path: "../../example-files",
 								},
 							},
 						},
@@ -113,11 +113,11 @@ func newJobForCR(cr *batchv1.ClusterScan) *batchv1.ClusterScan {
 									{
 										Name:  "kube-linter",
 										Image: "stackrox/kube-linter:0.2.2",
-										Args:  []string{"lint", "../../files-to-lint"},
+										Args:  []string{"lint", "../../example-files"},
 										VolumeMounts: []corev1.VolumeMount{
 											{
 												Name:      "dir-to-lint",
-												MountPath: "../../files-to-lint",
+												MountPath: "../../example-files",
 											},
 										},
 									},
@@ -128,7 +128,7 @@ func newJobForCR(cr *batchv1.ClusterScan) *batchv1.ClusterScan {
 										Name: "dir-to-lint",
 										VolumeSource: corev1.VolumeSource{
 											HostPath: &corev1.HostPathVolumeSource{
-												Path: "../../files-to-lint",
+												Path: "../../example-files",
 											},
 										},
 									},

@@ -15647,9 +15647,6 @@ spec:
                     - containers
                     type: object
                 type: object
-              schedule:
-                description: Schedule is a cron-like schedule for running the job
-                type: string
             type: object
           status:
             description: ClusterScanStatus defines the observed state of ClusterScan
